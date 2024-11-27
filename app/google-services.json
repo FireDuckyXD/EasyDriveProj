@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "592852698508",
+    "project_id": "easydriveproj",
+    "storage_bucket": "easydriveproj.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:592852698508:android:73f1b2a855f877d3bb02a9",
+        "android_client_info": {
+          "package_name": "com.example.easydriveproj"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBZ1wZRExV0VMub-427yZYO-RnKSM2eQY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
