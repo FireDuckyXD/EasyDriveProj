@@ -2,6 +2,7 @@ package com.example.easydriveproj;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private final ActivityResultLauncher<Intent> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
         @Override
         public void onActivityResult(ActivityResult result) {
+            Log.e("onActivityResult",result.toString());
             if (result.getResultCode() == RESULT_OK) {
                 Task<GoogleSignInAccount> accountTask = GoogleSignIn.getSignedInAccountFromIntent(result.getData());
                 try {
@@ -62,6 +64,10 @@ public class MainActivity extends AppCompatActivity {
                                 name.setText(auth.getCurrentUser().getDisplayName());
                                 mail.setText(auth.getCurrentUser().getEmail());
                                 Toast.makeText(MainActivity.this, "התחברות בוצעה בהצלחה", Toast.LENGTH_LONG).show();
+                                Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+                                intent.putExtra("name", auth.getCurrentUser().getDisplayName());
+                                startActivity(intent);
+                                finish();
                             } else {
                                 Toast.makeText(MainActivity.this, "התחברות נכשלה" + task.getException(), Toast.LENGTH_SHORT).show();
                             }
