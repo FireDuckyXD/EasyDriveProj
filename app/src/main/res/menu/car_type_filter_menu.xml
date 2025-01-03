@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/private_car"
+        android:title="רכב פרטי"/>
+    <item
+        android:id="@+id/truck"
+        android:title="משאית"/>
+    <item
+        android:id="@+id/motorcycle"
+        android:title="אופנוע"/>
+</menu>

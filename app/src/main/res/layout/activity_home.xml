@@ -8,4 +8,84 @@
     android:layout_height="match_parent"
     tools:context=".HomeActivity">
 
-  </androidx.constraintlayout.widget.ConstraintLayout>
+  <!-- Search Bar -->
+  <EditText
+      android:id="@+id/searchEditText"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_margin="16dp"
+      android:padding="12dp"
+      android:background="@drawable/search_background"
+      android:hint="חפש מורה נהיגה..."
+      android:drawableStart="@drawable/ic_search"
+      android:drawablePadding="8dp"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"/>
+
+  <!-- Filters Section -->
+  <HorizontalScrollView
+      android:id="@+id/filtersScroll"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginTop="8dp"
+      android:scrollbars="none"
+      app:layout_constraintTop_toBottomOf="@id/searchEditText">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+      <com.google.android.material.chip.Chip
+          android:id="@+id/priceFilter"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="מחיר"
+          android:layout_marginEnd="8dp"/>
+
+      <com.google.android.material.chip.Chip
+          android:id="@+id/ratingFilter"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="דירוג"
+          android:layout_marginEnd="8dp"/>
+
+      <com.google.android.material.chip.Chip
+          android:id="@+id/transmissionFilter"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="תיבת הילוכים"
+          android:layout_marginEnd="8dp"/>
+
+      <com.google.android.material.chip.Chip
+          android:id="@+id/carTypeFilter"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:minHeight="48dp"
+          android:text="סוג רכב" />
+
+    </LinearLayout>
+  </HorizontalScrollView>
+
+  <!-- Instructors List -->
+  <androidx.recyclerview.widget.RecyclerView
+      android:id="@+id/instructorsRecyclerView"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_marginTop="8dp"
+      app:layout_constraintTop_toBottomOf="@id/filtersScroll"
+      app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+      tools:listitem="@layout/item_instructor"/>
+
+  <!-- Bottom Navigation -->
+  <com.google.android.material.bottomnavigation.BottomNavigationView
+      android:id="@+id/bottomNavigation"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@color/white"
+      app:menu="@menu/bottom_navigation_menu"
+      app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
