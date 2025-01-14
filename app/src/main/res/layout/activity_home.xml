@@ -23,7 +23,7 @@
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintEnd_toEndOf="parent"/>
 
-  <!-- Filters Section -->
+  <!-- Simplified Filter Section -->
   <HorizontalScrollView
       android:id="@+id/filtersScroll"
       android:layout_width="match_parent"
@@ -38,32 +38,35 @@
         android:orientation="horizontal"
         android:padding="8dp">
 
-      <com.google.android.material.chip.Chip
+      <Button
           android:id="@+id/priceFilter"
+          style="@style/Widget.MaterialComponents.Button.OutlinedButton"
           android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="מחיר"
-          android:layout_marginEnd="8dp"/>
+          android:layout_height="48dp"
+          android:layout_marginEnd="8dp"
+          android:text="מחיר" />
 
-      <com.google.android.material.chip.Chip
+      <Button
           android:id="@+id/ratingFilter"
+          style="@style/Widget.MaterialComponents.Button.OutlinedButton"
           android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="דירוג"
-          android:layout_marginEnd="8dp"/>
+          android:layout_height="48dp"
+          android:layout_marginEnd="8dp"
+          android:text="דירוג" />
 
-      <com.google.android.material.chip.Chip
+      <Button
           android:id="@+id/transmissionFilter"
+          style="@style/Widget.MaterialComponents.Button.OutlinedButton"
           android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:text="תיבת הילוכים"
-          android:layout_marginEnd="8dp"/>
+          android:layout_height="48dp"
+          android:layout_marginEnd="8dp"
+          android:text="תיבת הילוכים" />
 
-      <com.google.android.material.chip.Chip
+      <Button
           android:id="@+id/carTypeFilter"
+          style="@style/Widget.MaterialComponents.Button.OutlinedButton"
           android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:minHeight="48dp"
+          android:layout_height="48dp"
           android:text="סוג רכב" />
 
     </LinearLayout>
