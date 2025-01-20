@@ -11,6 +11,7 @@ import androidx.core.view.WindowInsetsCompat;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.PopupMenu;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
@@ -18,10 +19,10 @@ import com.google.android.material.button.MaterialButton;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private MaterialButton priceFilter;
-    private MaterialButton ratingFilter;
-    private MaterialButton transmissionFilter;
-    private MaterialButton carTypeFilter;
+    private Button priceFilter;
+    private Button ratingFilter;
+    private Button transmissionFilter;
+    private Button carTypeFilter;
 
     @Override
 
