@@ -44,6 +44,7 @@
           android:layout_width="wrap_content"
           android:layout_height="48dp"
           android:layout_marginEnd="8dp"
+          android:textSize="16sp"
           android:text="מחיר" />
 
       <Button
@@ -52,6 +53,7 @@
           android:layout_width="wrap_content"
           android:layout_height="48dp"
           android:layout_marginEnd="8dp"
+          android:textSize="16sp"
           android:text="דירוג" />
 
       <Button
@@ -60,6 +62,7 @@
           android:layout_width="wrap_content"
           android:layout_height="48dp"
           android:layout_marginEnd="8dp"
+          android:textSize="16sp"
           android:text="תיבת הילוכים" />
 
       <Button
@@ -67,6 +70,7 @@
           style="@style/Widget.MaterialComponents.Button.OutlinedButton"
           android:layout_width="wrap_content"
           android:layout_height="48dp"
+          android:textSize="16sp"
           android:text="סוג רכב" />
 
     </LinearLayout>
@@ -89,6 +93,7 @@
       android:layout_height="wrap_content"
       android:background="@color/white"
       app:menu="@menu/bottom_navigation_menu"
-      app:layout_constraintBottom_toBottomOf="parent"/>
+      app:layout_constraintBottom_toBottomOf="parent"
+      tools:ignore="VisualLintBottomNav" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
