@@ -1,12 +1,13 @@
 package com.example.easydriveproj;
 
 import android.os.Bundle;
-
+import android.content.Intent;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.annotation.NonNull;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -15,7 +16,8 @@ import android.widget.Button;
 import android.widget.PopupMenu;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
-
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -23,15 +25,16 @@ public class HomeActivity extends AppCompatActivity {
     private Button ratingFilter;
     private Button transmissionFilter;
     private Button carTypeFilter;
+    private BottomNavigationView bottomNavigation;
 
     @Override
-
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
         initializeViews();
         setupDropdownMenus();
+        setupBottomNavigation();
     }
 
     private void initializeViews() {
@@ -39,6 +42,36 @@ public class HomeActivity extends AppCompatActivity {
         ratingFilter = findViewById(R.id.ratingFilter);
         transmissionFilter = findViewById(R.id.transmissionFilter);
         carTypeFilter = findViewById(R.id.carTypeFilter);
+        bottomNavigation = findViewById(R.id.bottomNavigation);
+    }
+
+    private void setupBottomNavigation() {
+        bottomNavigation.setSelectedItemId(R.id.navigation_home);
+
+        bottomNavigation.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int itemId = item.getItemId();
+
+                if (itemId == R.id.navigation_home) {
+                    // Already in Home
+                    return true;
+                }
+                else if (itemId == R.id.navigation_profile) {
+                    // Navigate to Profile
+                    Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
+                    startActivity(intent);
+                    return true;
+                }
+                else if (itemId == R.id.nav_favorites) {
+                    // Handle favorites navigation here
+                    // Intent intent = new Intent(HomeActivity.this, FavoritesActivity.class);
+                    // startActivity(intent);
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     private void setupDropdownMenus() {
@@ -144,7 +177,6 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-
         popup.show();
     }
 
@@ -176,6 +208,3 @@ public class HomeActivity extends AppCompatActivity {
         popup.show();
     }
 }
-
-
-

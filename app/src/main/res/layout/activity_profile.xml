@@ -24,14 +24,12 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <de.hdodenhof.circleimageview.CircleImageView
+            <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/profileImage"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_gravity="center"
-                android:src="@drawable/default_profile_image"
-                app:civ_border_color="#FF000000"
-                app:civ_border_width="2dp"/>
+                android:src="@drawable/default_user_pic"/>
 
             <TextView
                 android:id="@+id/userName"
@@ -72,7 +70,7 @@
             android:layout_marginVertical="8dp"
             android:padding="16dp"
             android:text="פרטים אישיים"
-            android:textAlignment="viewStart"/>
+            android:textAlignment="viewStart" />
 
         <!-- Payment Methods Button -->
         <com.google.android.material.button.MaterialButton
@@ -113,6 +111,7 @@
             android:padding="16dp"
             android:text="התנתק"
             android:textAlignment="viewStart"
+            android:textSize="16sp"
             android:textColor="@color/design_default_color_error"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
@@ -124,8 +123,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        app:menu="@menu/bottom_navigation_menu"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="parent"
+        app:menu="@menu/bottom_navigation_menu"
         tools:ignore="VisualLintBottomNav" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

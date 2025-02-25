@@ -92,8 +92,9 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:background="@color/white"
-      app:menu="@menu/bottom_navigation_menu"
       app:layout_constraintBottom_toBottomOf="parent"
-      tools:ignore="VisualLintBottomNav" />
+      app:menu="@menu/bottom_navigation_menu"
+      tools:ignore="VisualLintBottomNav"
+      tools:layout_editor_absoluteX="0dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

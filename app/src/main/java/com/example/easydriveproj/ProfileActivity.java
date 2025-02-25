@@ -32,6 +32,7 @@ public class ProfileActivity extends AppCompatActivity {
         setupBottomNavigation();
     }
 
+
     private void initializeViews() {
         personalInfoButton = findViewById(R.id.personalInfoButton);
         paymentMethodsButton = findViewById(R.id.paymentMethodsButton);
@@ -104,6 +105,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();  // Call the super method first
         // Navigate back to Home when back button is pressed
         Intent intent = new Intent(ProfileActivity.this, HomeActivity.class);
         startActivity(intent);
