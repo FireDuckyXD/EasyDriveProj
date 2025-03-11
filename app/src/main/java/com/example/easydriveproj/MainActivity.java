@@ -104,6 +104,9 @@ public class MainActivity extends AppCompatActivity {
                                         // Save user info to Firebase Realtime Database
                                         database.getReference("Users").child(userId).setValue(user);
 
+                                        // Initialize Firebase data if needed
+                                        FirebaseDataUtil.populateSampleData(MainActivity.this);
+
                                         // Load profile data
                                         Glide.with(MainActivity.this)
                                                 .load(Objects.requireNonNull(auth.getCurrentUser()).getPhotoUrl())
@@ -148,6 +151,18 @@ public class MainActivity extends AppCompatActivity {
 
         googleSignInClient = GoogleSignIn.getClient(MainActivity.this, options);
         auth = FirebaseAuth.getInstance();
+
+        // Check if user is already signed in
+        if (auth.getCurrentUser() != null) {
+            // User is already signed in, go directly to HomeActivity
+            // Initialize Firebase data if needed
+            FirebaseDataUtil.populateSampleData(MainActivity.this);
+
+            Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+            intent.putExtra("name", auth.getCurrentUser().getDisplayName());
+            startActivity(intent);
+            finish();
+        }
 
         SignInButton signInButton = findViewById(R.id.signIn);
         signInButton.setOnClickListener(new View.OnClickListener() {
