@@ -153,8 +153,15 @@ public class MainActivity extends AppCompatActivity {
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = googleSignInClient.getSignInIntent();
-                activityResultLauncher.launch(intent);
+                // Sign out first to force account selection
+                googleSignInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        // After signing out, launch the sign-in intent
+                        Intent intent = googleSignInClient.getSignInIntent();
+                        activityResultLauncher.launch(intent);
+                    }
+                });
             }
         });
     }
