@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/lessonCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/statusIndicator"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@android:drawable/presence_online"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/studentNameTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/statusIndicator"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="שם התלמיד" />
+
+        <TextView
+            android:id="@+id/dateTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:drawableStart="@android:drawable/ic_menu_my_calendar"
+            android:drawablePadding="4dp"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toStartOf="@+id/studentNameTextView"
+            app:layout_constraintTop_toBottomOf="@+id/studentNameTextView"
+            tools:text="15/03/2023" />
+
+        <TextView
+            android:id="@+id/timeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:drawableStart="@android:drawable/ic_menu_recent_history"
+            android:drawablePadding="4dp"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toEndOf="@+id/dateTextView"
+            app:layout_constraintTop_toTopOf="@+id/dateTextView"
+            tools:text="15:00 - 16:00" />
+
+        <TextView
+            android:id="@+id/locationTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:drawableStart="@android:drawable/ic_menu_directions"
+            android:drawablePadding="4dp"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            app:layout_constraintEnd_toStartOf="@+id/paymentStatusTextView"
+            app:layout_constraintStart_toStartOf="@+id/dateTextView"
+            app:layout_constraintTop_toBottomOf="@+id/dateTextView"
+            tools:text="תל אביב" />
+
+        <TextView
+            android:id="@+id/paymentStatusTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/locationTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/locationTextView"
+            tools:text="שולם"
+            tools:textColor="@android:color/holo_green_dark" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

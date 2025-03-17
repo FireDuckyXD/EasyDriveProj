@@ -114,8 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
                                         Toast.makeText(MainActivity.this, "התחברות בוצעה בהצלחה", Toast.LENGTH_LONG).show();
 
-                                        Intent intent = new Intent(MainActivity.this, HomeActivity.class);
-                                        intent.putExtra("name", auth.getCurrentUser().getDisplayName());
+                                        Intent intent = new Intent(MainActivity.this, RoleSelectionActivity.class);
                                         startActivity(intent);
                                         finish();
                                     } else {

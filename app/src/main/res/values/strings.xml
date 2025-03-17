@@ -13,6 +13,28 @@
 
     <string name="app_logo">לוגו אפליקציה</string>
     <string name="ministry_of_education">כניסה באמצעות משרד החינוך</string>
+
+    <!-- Role Selection Activity Strings -->
+    <string name="welcome_to_easydrive">ברוכים הבאים ל-EasyDrive</string>
+    <string name="choose_your_role">בחר את התפקיד שלך באפליקציה:</string>
+
+    <!-- Student Role -->
+    <string name="student_title">תלמיד/ה</string>
+    <string name="student_description">מחפש/ת מורה נהיגה לשיעורים</string>
+    <string name="student_icon_description">סמל תלמיד</string>
+    <string name="select_student_role">בחר</string>
+
+    <!-- Teacher Role -->
+    <string name="teacher_title">מורה נהיגה</string>
+    <string name="teacher_description">מלמד/ת נהיגה ומחפש/ת תלמידים</string>
+    <string name="teacher_icon_description">סמל מורה</string>
+    <string name="select_teacher_role">בחר</string>
+
+    <string-array name="transmission_types">
+        <item>אוטומט</item>
+        <item>ידני</item>
+    </string-array>
+
     <!--fire base -->
     <string name="client_id">592852698508-1kif2864eorph04t6alk9p88s3mftog3.apps.googleusercontent.com</string>
 </resources>
