@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -38,7 +38,7 @@ public class TeacherProfileActivity extends AppCompatActivity {
     private EditText priceEditText;
     private Spinner transmissionSpinner;
     private EditText carTypeEditText;
-    private Switch availabilitySwitch;
+    private SwitchMaterial availabilitySwitch;
     private Button saveButton;
     private Button logoutButton;
     private BottomNavigationView bottomNavigation;
@@ -173,7 +173,6 @@ public class TeacherProfileActivity extends AppCompatActivity {
                             }
                         } else {
                             // User is not registered as an instructor yet
-                            // Keep fields empty or with default values
                             Toast.makeText(TeacherProfileActivity.this,
                                     "לא נמצא פרופיל מורה. אנא מלא את הפרטים ושמור",
                                     Toast.LENGTH_SHORT).show();
