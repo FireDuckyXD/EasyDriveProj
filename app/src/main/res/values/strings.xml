@@ -35,6 +35,30 @@
         <item>ידני</item>
     </string-array>
 
+    <string-array name="cities_list">
+        <item>תל אביב</item>
+        <item>ירושלים</item>
+        <item>חיפה</item>
+        <item>באר שבע</item>
+        <item>ראשון לציון</item>
+        <item>פתח תקווה</item>
+        <item>נתניה</item>
+        <item>רעננה</item>
+        <item>הרצליה</item>
+        <item>חולון</item>
+        <item>אשדוד</item>
+        <item>בני ברק</item>
+        <item>רמת גן</item>
+        <item>נצרת</item>
+        <item>עפולה</item>
+        <item>כפר סבא</item>
+        <item>אילת</item>
+        <item>לוד</item>
+        <item>רמלה</item>
+        <item>קרית שמונה</item>
+        <item>אחר</item>
+    </string-array>
+
     <!--fire base -->
     <string name="client_id">592852698508-1kif2864eorph04t6alk9p88s3mftog3.apps.googleusercontent.com</string>
 </resources>
