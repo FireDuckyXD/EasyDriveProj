@@ -2,6 +2,7 @@ package com.example.easydriveproj;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -26,51 +27,114 @@ import java.util.List;
 
 public class TeacherStudentsActivity extends AppCompatActivity {
 
+    private static final String TAG = "TeacherStudentsActivity";
+
     private RecyclerView studentsRecyclerView;
     private List<Lesson> studentLessonsList;
     private BottomNavigationView bottomNavigation;
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
+    private String instructorId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_teacher_students);
+        Log.d(TAG, "onCreate: Starting activity");
 
-        // Set up toolbar
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle("התלמידים שלי");
+        try {
+            setContentView(R.layout.activity_teacher_students);
+
+            // Set up toolbar
+            Toolbar toolbar = findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setTitle("התלמידים שלי");
+            }
+
+            // Initialize Firebase
+            mAuth = FirebaseAuth.getInstance();
+            mDatabase = FirebaseDatabase.getInstance().getReference();
+
+            if (mAuth.getCurrentUser() == null) {
+                Toast.makeText(this, "משתמש לא מחובר", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, MainActivity.class));
+                finish();
+                return;
+            }
+
+            // Initialize views
+            studentsRecyclerView = findViewById(R.id.studentsRecyclerView);
+            bottomNavigation = findViewById(R.id.bottomNavigation);
+
+            // Check if we received an instructor ID from the intent
+            if (getIntent().hasExtra("INSTRUCTOR_ID")) {
+                instructorId = getIntent().getStringExtra("INSTRUCTOR_ID");
+                Log.d(TAG, "Received instructor ID: " + instructorId);
+            }
+
+            // Setup RecyclerView
+            studentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            studentLessonsList = new ArrayList<>();
+
+            // Set up the adapter with empty list first
+            LessonAdapter adapter = new LessonAdapter(this, studentLessonsList);
+            studentsRecyclerView.setAdapter(adapter);
+
+            // Load students
+            loadStudents();
+
+            // Setup bottom navigation
+            setupBottomNavigation();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error in onCreate: " + e.getMessage(), e);
+            Toast.makeText(this, "שגיאה באתחול מסך: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            finish();
         }
-
-        // Initialize Firebase
-        mAuth = FirebaseAuth.getInstance();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-
-        // Initialize views
-        studentsRecyclerView = findViewById(R.id.studentsRecyclerView);
-        bottomNavigation = findViewById(R.id.bottomNavigation);
-
-        // Setup RecyclerView
-        studentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        studentLessonsList = new ArrayList<>();
-
-        // Load students
-        loadStudents();
-
-        // Setup bottom navigation
-        setupBottomNavigation();
     }
 
     private void loadStudents() {
-        String currentInstructorId = mAuth.getCurrentUser().getUid();
+        try {
+            final String currentUserId = mAuth.getCurrentUser().getUid();
 
+            // If we don't have instructor ID yet, try to get it from the database
+            if (instructorId == null) {
+                mDatabase.child("Users").child(currentUserId).child("instructorId")
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.exists()) {
+                                    instructorId = snapshot.getValue(String.class);
+                                    queryLessons(currentUserId);
+                                } else {
+                                    // Fallback to using userId directly
+                                    queryLessons(currentUserId);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Log.e(TAG, "Error getting instructor ID: " + error.getMessage());
+                                // Fallback to using userId directly
+                                queryLessons(currentUserId);
+                            }
+                        });
+            } else {
+                // We already have instructor ID from intent
+                queryLessons(currentUserId);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error in loadStudents: " + e.getMessage(), e);
+            Toast.makeText(this, "שגיאה בטעינת תלמידים: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void queryLessons(String instructorId) {
         // Query lessons for this instructor
         Query studentsQuery = mDatabase.child("Lessons")
                 .orderByChild("instructorId")
-                .equalTo(currentInstructorId);
+                .equalTo(instructorId);
 
         studentsQuery.addValueEventListener(new ValueEventListener() {
             @Override
@@ -79,9 +143,15 @@ public class TeacherStudentsActivity extends AppCompatActivity {
 
                 // Collect unique lessons
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Lesson lesson = snapshot.getValue(Lesson.class);
-                    if (lesson != null) {
-                        studentLessonsList.add(lesson);
+                    try {
+                        Lesson lesson = snapshot.getValue(Lesson.class);
+                        if (lesson != null) {
+                            // Make sure to set the lesson ID
+                            lesson.setId(snapshot.getKey());
+                            studentLessonsList.add(lesson);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing lesson data: " + e.getMessage(), e);
                     }
                 }
 
@@ -98,6 +168,7 @@ public class TeacherStudentsActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e(TAG, "Database error: " + databaseError.getMessage());
                 Toast.makeText(TeacherStudentsActivity.this,
                         "שגיאה בטעינת תלמידים: " + databaseError.getMessage(),
                         Toast.LENGTH_SHORT).show();

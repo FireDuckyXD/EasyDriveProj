@@ -2,6 +2,7 @@ package com.example.easydriveproj;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -141,8 +142,38 @@ public class TeacherDashboardActivity extends AppCompatActivity {
         studentsCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(TeacherDashboardActivity.this, TeacherStudentsActivity.class);
-                startActivity(intent);
+                try {
+                    // Check if current user has instructor ID first
+                    String userId = mAuth.getCurrentUser().getUid();
+                    mDatabase.child("Users").child(userId).child("instructorId")
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if (snapshot.exists() && snapshot.getValue() != null) {
+                                        // Found instructor ID, safe to navigate
+                                        Intent intent = new Intent(TeacherDashboardActivity.this, TeacherStudentsActivity.class);
+                                        // Pass instructor ID to the students activity
+                                        intent.putExtra("INSTRUCTOR_ID", snapshot.getValue(String.class));
+                                        startActivity(intent);
+                                    } else {
+                                        // No instructor ID found
+                                        Toast.makeText(TeacherDashboardActivity.this,
+                                                "אנא צור פרופיל מורה תחילה", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Toast.makeText(TeacherDashboardActivity.this,
+                                            "שגיאה בטעינת נתוני מורה", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                } catch (Exception e) {
+                    Toast.makeText(TeacherDashboardActivity.this,
+                            "שגיאה במעבר לרשימת תלמידים: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                    Log.e("TeacherDashboard", "Error navigating to students: " + e.getMessage(), e);
+                }
             }
         });
 
@@ -178,22 +209,21 @@ public class TeacherDashboardActivity extends AppCompatActivity {
             }
         }
 
-        // Check if user is already registered as an instructor
-        mDatabase.child("Instructors").orderByChild("userId").equalTo(currentUserId)
+        // First check if user has instructorId in their user data
+        mDatabase.child("Users").child(currentUserId).child("instructorId")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                            // User is already an instructor, load instructor data
-                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                Instructor instructor = snapshot.getValue(Instructor.class);
-                                if (instructor != null) {
-                                    updateUIWithInstructorData(instructor);
-                                }
-                            }
+                        if (dataSnapshot.exists() && dataSnapshot.getValue(String.class) != null) {
+                            // User has an instructor ID, hide registration card
+                            instructorRegistrationCard.setVisibility(View.GONE);
+
+                            // Load instructor data using that ID
+                            String instructorId = dataSnapshot.getValue(String.class);
+                            loadInstructorDataById(instructorId);
                         } else {
-                            // User is not registered as an instructor yet
-                            promptInstructorRegistration();
+                            // Fallback to checking by userId
+                            checkInstructorByUserId();
                         }
                     }
 
@@ -218,6 +248,64 @@ public class TeacherDashboardActivity extends AppCompatActivity {
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                         Toast.makeText(TeacherDashboardActivity.this,
                                 "שגיאה בטעינת נתוני שיעורים: " + databaseError.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // Add this helper method to load instructor data by ID
+    private void loadInstructorDataById(String instructorId) {
+        mDatabase.child("Instructors").child(instructorId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Instructor instructor = dataSnapshot.getValue(Instructor.class);
+                        if (instructor != null) {
+                            updateUIWithInstructorData(instructor);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Toast.makeText(TeacherDashboardActivity.this,
+                                "שגיאה בטעינת נתונים: " + databaseError.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // Add this method to maintain backward compatibility
+    private void checkInstructorByUserId() {
+        // Check if user is already registered as an instructor
+        mDatabase.child("Instructors").orderByChild("userId").equalTo(currentUserId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            // User is already an instructor, hide registration card
+                            instructorRegistrationCard.setVisibility(View.GONE);
+
+                            // Load instructor data
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                Instructor instructor = snapshot.getValue(Instructor.class);
+                                if (instructor != null) {
+                                    // Also store the instructor ID in user data for future reference
+                                    mDatabase.child("Users").child(currentUserId).child("instructorId")
+                                            .setValue(snapshot.getKey());
+
+                                    updateUIWithInstructorData(instructor);
+                                }
+                            }
+                        } else {
+                            // User is not registered as an instructor yet
+                            promptInstructorRegistration();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Toast.makeText(TeacherDashboardActivity.this,
+                                "שגיאה בטעינת נתונים: " + databaseError.getMessage(),
                                 Toast.LENGTH_SHORT).show();
                     }
                 });

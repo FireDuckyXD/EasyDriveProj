@@ -131,8 +131,13 @@ public class CreateInstructorProfileActivity extends AppCompatActivity {
                         Toast.makeText(CreateInstructorProfileActivity.this,
                                 "פרופיל המורה נוצר בהצלחה", Toast.LENGTH_SHORT).show();
 
-                        // Return to dashboard
-                        Intent intent = new Intent(CreateInstructorProfileActivity.this, TeacherDashboardActivity.class);
+                        // Store the instructor ID in user data for easy reference
+                        mDatabase.child("Users").child(userId).child("instructorId").setValue(instructorId);
+
+                        // Navigate to TeacherProfileActivity instead of TeacherDashboardActivity
+                        Intent intent = new Intent(CreateInstructorProfileActivity.this, TeacherProfileActivity.class);
+                        // Pass instructor ID to the profile activity
+                        intent.putExtra("INSTRUCTOR_ID", instructorId);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);
                         finish();

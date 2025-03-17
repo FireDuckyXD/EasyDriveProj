@@ -47,6 +47,7 @@ public class TeacherProfileActivity extends AppCompatActivity {
     private DatabaseReference mDatabase;
     private Uri imageUri;
     private String currentInstructorId;
+    private boolean dataLoaded = false; // Flag to track if data has been loaded
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,9 +144,23 @@ public class TeacherProfileActivity extends AppCompatActivity {
     }
 
     private void loadInstructorData() {
+        // If we've already loaded data in this session, don't reload
+        if (dataLoaded) return;
+
         FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) return;
+
         String userId = currentUser.getUid();
 
+        // First check if we received an instructor ID directly from intent
+        String intentInstructorId = getIntent().getStringExtra("INSTRUCTOR_ID");
+        if (intentInstructorId != null && !intentInstructorId.isEmpty()) {
+            currentInstructorId = intentInstructorId;
+            loadInstructorById(intentInstructorId);
+            return;
+        }
+
+        // Otherwise, proceed with previous loading logic
         // First load basic user info
         if (currentUser.getDisplayName() != null) {
             nameEditText.setText(currentUser.getDisplayName());
@@ -157,6 +172,61 @@ public class TeacherProfileActivity extends AppCompatActivity {
                     .into(profileImageView);
         }
 
+        // Look up the instructor ID from user data
+        mDatabase.child("Users").child(userId).child("instructorId")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            String instructorId = dataSnapshot.getValue(String.class);
+                            if (instructorId != null && !instructorId.isEmpty()) {
+                                currentInstructorId = instructorId;
+                                loadInstructorById(instructorId);
+                            } else {
+                                checkInstructorByUserId(userId);
+                            }
+                        } else {
+                            checkInstructorByUserId(userId);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Toast.makeText(TeacherProfileActivity.this,
+                                "שגיאה בטעינת נתונים: " + databaseError.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // Helper method to load instructor by ID
+    private void loadInstructorById(String instructorId) {
+        mDatabase.child("Instructors").child(instructorId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        Instructor instructor = dataSnapshot.getValue(Instructor.class);
+                        if (instructor != null) {
+                            fillInstructorFields(instructor);
+                            dataLoaded = true; // Mark data as loaded
+                        } else {
+                            Toast.makeText(TeacherProfileActivity.this,
+                                    "לא נמצא פרופיל מורה. אנא מלא את הפרטים ושמור",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Toast.makeText(TeacherProfileActivity.this,
+                                "שגיאה בטעינת נתונים: " + databaseError.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    // Method to maintain backward compatibility
+    private void checkInstructorByUserId(String userId) {
         // Then check if user is already registered as an instructor
         mDatabase.child("Instructors").orderByChild("userId").equalTo(userId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -168,7 +238,10 @@ public class TeacherProfileActivity extends AppCompatActivity {
                                 currentInstructorId = snapshot.getKey();
                                 Instructor instructor = snapshot.getValue(Instructor.class);
                                 if (instructor != null) {
+                                    // Also store the instructor ID in user data for future reference
+                                    mDatabase.child("Users").child(userId).child("instructorId").setValue(currentInstructorId);
                                     fillInstructorFields(instructor);
+                                    dataLoaded = true; // Mark data as loaded
                                 }
                             }
                         } else {
@@ -264,8 +337,12 @@ public class TeacherProfileActivity extends AppCompatActivity {
             instructorsRef.child(currentInstructorId).setValue(instructor)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
+                            // Make sure to store the instructor ID in user data
+                            mDatabase.child("Users").child(userId).child("instructorId").setValue(currentInstructorId);
+
                             Toast.makeText(TeacherProfileActivity.this,
                                     "פרופיל המורה עודכן בהצלחה", Toast.LENGTH_SHORT).show();
+                            dataLoaded = true; // Mark data as loaded after successful save
                         } else {
                             Toast.makeText(TeacherProfileActivity.this,
                                     "שגיאה בעדכון פרופיל: " + task.getException(),
@@ -279,14 +356,28 @@ public class TeacherProfileActivity extends AppCompatActivity {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             currentInstructorId = newInstructorId;
+                            // Store the instructor ID in user data for future reference
+                            mDatabase.child("Users").child(userId).child("instructorId").setValue(newInstructorId);
+
                             Toast.makeText(TeacherProfileActivity.this,
                                     "פרופיל המורה נוצר בהצלחה", Toast.LENGTH_SHORT).show();
+                            dataLoaded = true; // Mark data as loaded after successful save
                         } else {
                             Toast.makeText(TeacherProfileActivity.this,
                                     "שגיאה ביצירת פרופיל: " + task.getException(),
                                     Toast.LENGTH_SHORT).show();
                         }
                     });
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Check if we need to reload data (e.g., after a login)
+        if (!dataLoaded) {
+            loadInstructorData();
         }
     }
 }

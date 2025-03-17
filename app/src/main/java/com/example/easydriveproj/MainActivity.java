@@ -30,7 +30,11 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
 
@@ -91,32 +95,31 @@ public class MainActivity extends AppCompatActivity {
                                         auth = FirebaseAuth.getInstance();
                                         FirebaseDatabase database = FirebaseDatabase.getInstance();
                                         String userId = Objects.requireNonNull(auth.getCurrentUser()).getUid();
+                                        final String userEmail = auth.getCurrentUser().getEmail();
 
-                                        // Create a custom User object
-                                        User user = new User(
-                                                userId,
-                                                auth.getCurrentUser().getDisplayName(),
-                                                auth.getCurrentUser().getEmail(),
-                                                auth.getCurrentUser().getPhotoUrl() != null ?
-                                                        auth.getCurrentUser().getPhotoUrl().toString() : ""
-                                        );
+                                        // Check if this email has been used before with a different account
+                                        database.getReference("EmailToUser").child(encodeEmail(userEmail))
+                                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                        String previousUserId = snapshot.getValue(String.class);
 
-                                        // Save user info to Firebase Realtime Database
-                                        database.getReference("Users").child(userId).setValue(user);
+                                                        if (previousUserId != null && !previousUserId.equals(userId)) {
+                                                            // Email exists but linked to different account - transfer data
+                                                            transferUserData(previousUserId, userId, userEmail);
+                                                        } else {
+                                                            // New user or same user, just save/update basic info
+                                                            saveUserInfo(userId, userEmail);
+                                                        }
+                                                    }
 
-                                        // Load profile data
-                                        Glide.with(MainActivity.this)
-                                                .load(Objects.requireNonNull(auth.getCurrentUser()).getPhotoUrl())
-                                                .into(imageView);
-
-                                        name.setText(auth.getCurrentUser().getDisplayName());
-                                        mail.setText(auth.getCurrentUser().getEmail());
-
-                                        Toast.makeText(MainActivity.this, "התחברות בוצעה בהצלחה", Toast.LENGTH_LONG).show();
-
-                                        Intent intent = new Intent(MainActivity.this, RoleSelectionActivity.class);
-                                        startActivity(intent);
-                                        finish();
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError error) {
+                                                        Log.e("Firebase", "Error checking email: " + error.getMessage());
+                                                        // Continue with account creation anyway
+                                                        saveUserInfo(userId, userEmail);
+                                                    }
+                                                });
                                     } else {
                                         Toast.makeText(MainActivity.this, "התחברות נכשלה" + task.getException(), Toast.LENGTH_SHORT).show();
                                     }
@@ -163,5 +166,128 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    // Helper method to save user info
+    private void saveUserInfo(String userId, String email) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+        // Create a custom User object
+        User user = new User(
+                userId,
+                auth.getCurrentUser().getDisplayName(),
+                email,
+                auth.getCurrentUser().getPhotoUrl() != null ?
+                        auth.getCurrentUser().getPhotoUrl().toString() : ""
+        );
+
+        // Save user info to Firebase Realtime Database
+        database.getReference("Users").child(userId).setValue(user);
+
+        // Create/update email to user mapping
+        database.getReference("EmailToUser").child(encodeEmail(email)).setValue(userId);
+
+        // Load profile data for UI
+        Glide.with(MainActivity.this)
+                .load(Objects.requireNonNull(auth.getCurrentUser()).getPhotoUrl())
+                .into(imageView);
+
+        name.setText(auth.getCurrentUser().getDisplayName());
+        mail.setText(email);
+
+        Toast.makeText(MainActivity.this, "התחברות בוצעה בהצלחה", Toast.LENGTH_LONG).show();
+
+        // Navigate to role selection
+        Intent intent = new Intent(MainActivity.this, RoleSelectionActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    // Helper method to transfer user data from one account to another
+    private void transferUserData(String oldUserId, final String newUserId, final String email) {
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final DatabaseReference oldUserRef = database.getReference("Users").child(oldUserId);
+        final DatabaseReference newUserRef = database.getReference("Users").child(newUserId);
+
+        // First, check if the old user has instructor data to transfer
+        database.getReference("Users").child(oldUserId).child("instructorId")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        String instructorId = snapshot.getValue(String.class);
+
+                        if (instructorId != null) {
+                            // Transfer instructor ID to new user
+                            newUserRef.child("instructorId").setValue(instructorId);
+
+                            // Update the userId field in the instructor record
+                            database.getReference("Instructors").child(instructorId).child("userId")
+                                    .setValue(newUserId);
+
+                            Toast.makeText(MainActivity.this,
+                                    "פרופיל המורה שלך הועבר לחשבון הנוכחי",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        // Create/update basic user info
+                        User user = new User(
+                                newUserId,
+                                auth.getCurrentUser().getDisplayName(),
+                                email,
+                                auth.getCurrentUser().getPhotoUrl() != null ?
+                                        auth.getCurrentUser().getPhotoUrl().toString() : ""
+                        );
+
+                        // Copy over role if exists
+                        oldUserRef.child("role").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.exists()) {
+                                    String role = snapshot.getValue(String.class);
+                                    newUserRef.child("role").setValue(role);
+                                }
+
+                                // Save the new user info
+                                newUserRef.setValue(user);
+
+                                // Update email mapping
+                                database.getReference("EmailToUser").child(encodeEmail(email)).setValue(newUserId);
+
+                                // Load profile data for UI
+                                Glide.with(MainActivity.this)
+                                        .load(Objects.requireNonNull(auth.getCurrentUser()).getPhotoUrl())
+                                        .into(imageView);
+
+                                name.setText(auth.getCurrentUser().getDisplayName());
+                                mail.setText(email);
+
+                                Toast.makeText(MainActivity.this, "התחברות בוצעה בהצלחה", Toast.LENGTH_LONG).show();
+
+                                // Navigate to role selection
+                                Intent intent = new Intent(MainActivity.this, RoleSelectionActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                // Proceed anyway with user creation
+                                saveUserInfo(newUserId, email);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Proceed anyway with user creation
+                        saveUserInfo(newUserId, email);
+                    }
+                });
+    }
+
+    // Helper method to encode email for Firebase path (cannot contain ., #, $, [, ])
+    private String encodeEmail(String email) {
+        return email.replace(".", ",").replace("#", "-")
+                .replace("$", "_").replace("[", "(").replace("]", ")");
     }
 }
